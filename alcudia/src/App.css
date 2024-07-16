@@ -1,0 +1,31 @@
+#root {
+  margin: 0 auto;
+}
+
+h1 {
+  color: black;
+}
+
+.carrito {
+  width: 20px;
+}
+
+.navbar {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar li {
+  margin-right: 20px;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: black;
+}
+
+.bg-body-tertiary {
+  margin-top: auto;
+}
