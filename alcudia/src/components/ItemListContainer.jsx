@@ -1,57 +1,35 @@
-import React from "react";
-import data from "../data/products.json";
-import { useEffect, useState } from "react";
-import Button from "react-bootstrap/Button";
-import Card from "react-bootstrap/Card";
-import { Link, useParams } from "react-router-dom";
-import Container from "react-bootstrap/esm/Container";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {
+  getFirestore,
+  getDocs,
+  collection,
+  where,
+  query,
+} from "firebase/firestore";
+import ItemList from "./ItemList";
 
 const ItemListContainer = () => {
   const [items, setItems] = useState([]);
-  //lo que se muestra hasta que pasan los 2seg//
   const [loading, setLoading] = useState(true);
 
   const { id } = useParams();
 
   useEffect(() => {
-    new Promise((resolve, reject) => {
-      setTimeout(() => resolve(data), 2000);
-    })
-      .then((response) => {
-        if (!id) {
-          setItems(response);
-        } else {
-          const filter = response.filter((i) => i.category === id);
-          setItems(filter);
-        }
+    const db = getFirestore();
+
+    const refCollection = !id
+      ? collection(db, "items")
+      : query(collection(db, "items"), where("category", "==", id));
+
+    getDocs(refCollection)
+      .then((snapshot) => {
+        setItems(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
       })
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) {
-    return <h1>Loading...</h1>;
-  }
-
-  return (
-    <Container className="mt-4">
-      <h1>Productos</h1>
-      <div className="d-flex flex-wrap justify-content-between">
-        {items.map((item) => (
-          <Card key={item.id} style={{ width: "18rem", marginBottom: "1rem" }}>
-            <Card.Img variant="top" src={item.img} />
-            <Card.Body>
-              <Card.Title>{item.name}</Card.Title>
-              <Card.Text>{item.category}</Card.Text>
-              <Card.Text>{item.detail}</Card.Text>
-              <Link to={`/item/${item.id}`}>
-                <Button variant="primary">Ver más</Button>
-              </Link>
-            </Card.Body>
-          </Card>
-        ))}
-      </div>
-    </Container>
-  );
+  return <>{loading ? <h5>Loading...</h5> : <ItemList products={items} />}</>;
 };
 
 export default ItemListContainer;
